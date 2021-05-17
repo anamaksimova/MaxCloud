@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class ClientHandler implements Runnable{
     private final Socket socket;
@@ -21,13 +22,17 @@ public class ClientHandler implements Runnable{
         { while (true){
             String command = in.readUTF();
             if ("exit".equals(command)){
+                System.out.printf("Client %s is disconnected correctly\n", socket.getInetAddress());
                 break;
             }
             System.out.println(command);
             out.writeUTF(command);
         }
 
-        } catch (Exception e) {
+        }  catch (SocketException socketException) {
+            System.out.printf("Client %s is disconnected \n", socket.getInetAddress());
+            socketException.printStackTrace();
+        }catch (Exception e) {
             e.printStackTrace();
         }
     }
