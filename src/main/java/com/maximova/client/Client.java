@@ -9,6 +9,7 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class Client {
     private final Socket socket;
@@ -59,11 +60,16 @@ public class Client {
     private void sendMessage(String message) {
         try {
             out.writeUTF(message);
-            System.out.println(in.readUTF());
+            String command = in.readUTF();
+            System.out.println(command);
 
         } catch (EOFException eofException) {
             System.err.println("Reading command error from " + socket.getInetAddress());
             eofException.printStackTrace();
+        }
+        catch (SocketException socketException) {
+            System.err.println("Socket error from " + socket.getInetAddress());
+           // socketException.printStackTrace();
         }
         catch (IOException e) {
             e.printStackTrace();
