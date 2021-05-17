@@ -10,7 +10,10 @@ public class Server {
     public Server(){
         ExecutorService service = Executors.newFixedThreadPool(4);
         try (ServerSocket server = new ServerSocket(6789)) {
-            server.accept();
+            while (true){
+                service.execute(new ClientHandler(server.accept()));
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
