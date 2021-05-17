@@ -22,6 +22,9 @@ public class ClientHandler implements Runnable{
         { while (true){
             String command = in.readUTF();
             if ("exit".equals(command)){
+
+                out.writeUTF("DONE");
+                disconnected();
                 System.out.printf("Client %s is disconnected correctly\n", socket.getInetAddress());
                 break;
             }
@@ -33,6 +36,14 @@ public class ClientHandler implements Runnable{
             System.out.printf("Client %s is disconnected \n", socket.getInetAddress());
             socketException.printStackTrace();
         }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void disconnected() {
+        try {
+            socket.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
