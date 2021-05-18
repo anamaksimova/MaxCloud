@@ -4,10 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 
@@ -32,7 +29,7 @@ public class Client {
         JTextField textField=new JTextField();
         btnSend.addActionListener(a ->{
             String message= textField.getText();
-            sendMessage(message);
+            sendFile(message);
         });
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -52,6 +49,35 @@ public class Client {
 
 
     }
+
+    private void sendFile(String filename) {
+        try{
+            File file = new File("client/" + filename);
+            if(!file.exists()){
+                throw new FileNotFoundException();
+            }
+
+            long fileLength=file.length();
+            FileInputStream fis = new FileInputStream(file);
+            out.writeUTF("upload");
+            out.writeUTF(filename);
+            out.writeLong(fileLength);
+
+            int read = 0;
+            byte[] buffer = new byte[8*1024];
+            while ((read=fis.read(buffer)) != -1){
+                out.write(buffer,0,read);
+            }
+            out.flush();
+            String status = in.readUTF();
+            System.out.println("Sending status: "+ status);
+        } catch (FileNotFoundException e) {
+            System.err.println("File not found - /client/" + filename);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * message sending
      * @param message String
