@@ -8,6 +8,11 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 
+/**
+ * Swing client - File Storage
+ * Client command: upload filename|download filename
+ */
+
 public class Client {
     private final Socket socket;
     private final DataOutputStream out;
@@ -28,8 +33,13 @@ public class Client {
         JButton btnSend = new JButton("SEND");
         JTextField textField=new JTextField();
         btnSend.addActionListener(a ->{
-            String message= textField.getText();
-            sendFile(message);
+            String[] cmd= textField.getText().split(" ");
+            if ("upload".equals(cmd[0])){
+                sendFile(cmd[1]);
+            } else if ("download".equals(cmd[0])){
+                getFile(cmd[1]);
+            }
+            
         });
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -48,6 +58,10 @@ public class Client {
 
 
 
+    }
+
+    private void getFile(String filename) {
+        //TODO downloading
     }
 
     private void sendFile(String filename) {

@@ -2,6 +2,7 @@ package com.maximova.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -11,7 +12,9 @@ public class Server {
         ExecutorService service = Executors.newFixedThreadPool(4);
         try (ServerSocket server = new ServerSocket(6789)) {
             while (true){
-                service.execute(new ClientHandler(server.accept()));
+                Socket socket = server.accept();
+                System.out.println("Client accepted " + socket.getInetAddress());
+                service.execute(new ClientHandler(socket));
             }
 
         } catch (Exception e) {
