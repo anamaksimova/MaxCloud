@@ -62,16 +62,28 @@ public class Client {
             out.writeUTF(message);
             String command = in.readUTF();
             System.out.println(command);
+            if ("DONE".equals(command)){
+                disconnected();
+                System.out.printf("Client %s is disconnected correctly\n", socket.getInetAddress());
+            }
 
         } catch (EOFException eofException) {
             System.err.println("Reading command error from " + socket.getInetAddress());
             eofException.printStackTrace();
         }
         catch (SocketException socketException) {
-            System.err.println("Socket error from " + socket.getInetAddress());
-           // socketException.printStackTrace();
+            System.out.printf("Client %s is disconnected \n", socket.getInetAddress());
+            socketException.printStackTrace();
         }
         catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void disconnected() {
+        try {
+            socket.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
