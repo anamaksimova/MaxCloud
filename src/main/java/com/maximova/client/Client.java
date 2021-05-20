@@ -62,6 +62,118 @@ public class Client {
 
     private void getFile(String filename) {
         //TODO downloading
+
+        try {
+            //запрос о существовании файла на сервере
+            out.writeUTF("check");
+            out.writeUTF(filename);
+            String statusOfFIleAtServer = in.readUTF();
+            System.out.println("File status: "+ statusOfFIleAtServer);
+            File file = new File("client/" + filename);
+            //если файл на сервере есть, а на клиенте такого названия нет - создается и скачивается
+        if (statusOfFIleAtServer.equals("File ready") && (!file.exists())) {
+            try {
+                out.writeUTF("download");
+                out.writeUTF(filename);
+                file.createNewFile();
+            //работало через раз либо печатало лишнее в файл и зависало до ввода потоков
+                Thread t1 = new Thread(() -> {
+
+                    try {
+                        FileOutputStream fos = new FileOutputStream(file);
+                        long size = in.readLong();
+                        byte[] buffer = new byte[8 * 1024];
+                        for (int i = 0; i < (size + (8 * 1024 - 1)) / buffer.length; i++) {
+                            int read = in.read(buffer);
+                            fos.write(buffer, 0, read);
+                        }
+                        fos.close();
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+                Thread t2 = new Thread(() -> {
+                    try {
+                        String status = in.readUTF();
+                        System.out.println("Sending status: " + status);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+            });
+                t1.start();
+                t1.join();
+                t2.start();
+                t2.join();
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+           }
+            //если файл есть на сервере и на клиенте, делается копия
+        } else if (statusOfFIleAtServer.equals("File ready") && (file.exists())) {
+            try {
+                out.writeUTF("download");
+                out.writeUTF(filename);
+
+                Thread t1 = new Thread(() -> {
+                    try {
+                        File file_copy = new File("client/" + "copy_"+filename);
+                        file_copy.createNewFile();
+                        FileOutputStream fos = new FileOutputStream(file_copy);
+                        long size = in.readLong();
+                        byte[] buffer = new byte[8 * 1024];
+                        for (int i = 0; i < (size + (8 * 1024 - 1)) / buffer.length; i++) {
+                            int read = in.read(buffer);
+                            fos.write(buffer, 0, read);
+                        }
+                        fos.close();
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+                Thread t2 = new Thread(() -> {
+                    try {
+                        String status = in.readUTF();
+                        System.out.println("Sending status: " + status);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
+                t1.start();
+                t1.join();
+                t2.start();
+                t2.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else if ("No file".equals(statusOfFIleAtServer)) {
+            System.err.println("File not found - /client/" + filename);
+        }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void sendFile(String filename) {
